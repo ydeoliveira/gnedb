@@ -1,0 +1,54 @@
+{%extends "index.html"%}
+{%load playertag%}
+{%block content%}
+
+<br /><br />
+<center>
+<h1>{{title}}</h1>
+<br/><br/>
+
+{%if form%}
+<form method="POST" action="">
+
+<table>
+{{form.errors}}
+<tr><td>Nom contient : </td><td></td><td>{{form.name}}</td></tr>
+<tr><td>Age : </td><td>{{form.min_age}}</td><td>{{form.max_age}}</td></tr>
+<tr><td>Taille : </td><td>{{form.min_height}}</td><td>{{form.max_height}}</td></tr>
+
+<tr><td>Def : </td><td>{{form.min_def}}</td><td>{{form.max_def}}</td></tr>
+<tr><td>Shoot : </td><td>{{form.min_shoot}}</td><td>{{form.max_shoot}}</td></tr>
+<tr><td>Vit : </td><td>{{form.min_speed}}</td><td>{{form.max_speed}}</td></tr>
+<tr><td>Dri : </td><td>{{form.min_drib}}</td><td>{{form.max_drib}}</td></tr>
+<tr><td>Passe : </td><td>{{form.min_pass}}</td><td>{{form.max_pass}}</td></tr>
+<tr><td>JdJ : </td><td>{{form.min_ftw}}</td><td>{{form.max_ftw}}</td></tr>
+<tr><td>Reb : </td><td>{{form.min_reb}}</td><td>{{form.max_reb}}</td></tr>
+<tr><td>Xp : </td><td>{{form.min_xp}}</td><td>{{form.max_xp}}</td></tr>
+<tr><td>Trier par : </td><td></td><td></td></tr>
+<tr>	<td>{{form.sort1}}</td><td>puis</td><td>{{form.sort2}}</td></tr>
+<tr><td></td><td><input type='submit' value='Soumettre'/></td></tr>
+</table>
+</form>
+{%endif%}
+{%if players%}
+<br/><br/>
+	{%for p in players%}
+	<b>{{p.full_name}}</b> last update : {{p.last_update|date:"d/m/Y"}}<br/>
+	<br/>
+	<table>
+	
+	<tr><td>Age:</td><td>{{p.age}}</td><td>Équipe :</td><td>{{p.team}}</td></tr>
+	<tr><td>Taille:</td><td>{{p.height}}</td><td>IMC:</td><td>{{p.imc}}</td></tr>
+	<tr><td>Ind. carac.:</td><td>{{p.ic}}</td><td></td><td></td></tr>
+	<tr><td>Défense:</td><td bgcolor="{{p.defense|caracolor}}"><b>{{p.defense}}</b></td><td>Lancers francs:</td><td bgcolor="{{p.freethrow|caracolor}}"><b>{{p.freethrow}}</b></td></tr>
+	<tr><td>2 points:</td><td bgcolor="{{p.twopts|caracolor}}"><b>{{p.twopts}}</b></td><td>3 points:</td><td bgcolor="{{p.threepts|caracolor}}"><b>{{p.threepts}}</b></td></tr>
+	<tr><td>Dribble:</td><td bgcolor="{{p.dribbling|caracolor}}"><b>{{p.dribbling}}</b></td><td>Passe:</td><td bgcolor="{{p.passing|caracolor}}"><b>{{p.passing}}</b></td></tr>
+	<tr><td>Vitesse:</td><td bgcolor="{{p.speed|caracolor}}"><b>{{p.speed}}</b></td><td>Jeu de jambes:</td><td bgcolor="{{p.footwork|caracolor}}"><b>{{p.footwork}}</b></td></tr>
+	<tr><td>Rebonds:</td><td bgcolor="{{p.rebond|caracolor}}"><b>{{p.rebond}}</b></td><td>Expérience:</td><td bgcolor="{{p.experience|caracolor}}"><b>{{p.experience}}</b></td></tr>
+	</table>
+	<br /><br />
+	<hr />
+	{%endfor%}
+{%endif%}
+</center><br /><br />
+{%endblock%}

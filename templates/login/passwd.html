@@ -1,0 +1,19 @@
+{%extends "index.html"%}
+{%block profile%}current_page_item{%endblock%}
+{%block content%}
+<div class="post">
+<br /><br />
+<center>
+<form method="POST">
+<table>
+{{form.as_table}}
+<tr><td></td><td><input type='submit' value='Modifier'/></td></tr>
+</table>
+</form>
+</center><br /><br />
+</div>
+{%endblock%}
+
+{%block sidebar%}
+
+{%endblock%}
