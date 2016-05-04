@@ -4,3 +4,4 @@
 /forms.pyc
 /models.pyc
 /views.pyc
+*.pyc
