@@ -1,0 +1,57 @@
+{%extends "index.html"%}
+{%load playertag%}
+
+{%block content%}
+<br /><br />
+<center>
+
+<h1>{{team}}</h1>
+<br /><br />
+Filtre IC utilisé : <b>{{filter}}</b>
+<br /><br />
+<table>
+<tr>
+	<th width="250px">Nom</th>
+	<th width="100px">IC</th>
+	<th width="50px">Age</th>
+	<th width="50px">Taille</th>
+	<th width="50px">IMC</th>
+	
+	<th width="30px">Def</th>
+	<th width="30px">LF</th>
+	<th width="30px">2pts</th>
+	<th width="30px">3pts</th>
+	<th width="30px">Dri</th>
+	<th width="30px">Pas</th>
+	<th width="30px">Vit</th>
+	<th width="30px">JdJ</th>
+	<th width="30px">Reb</th>
+	<th width="30px">Xp</th>
+	<th width="150px">Last update</th>
+
+</tr>
+{%for p in players%}
+<tr height="20px">
+	<td>{{p.full_name}}</td>
+	<td>{{p.ic}}</td>
+	<td>{{p.age}}</td>
+	<td>{{p.height}}</td>
+	<td>{{p.imc}}</td>
+	<td bgcolor="{{p.defense|caracolor}}">{{p.defense}}</td>
+	<td bgcolor="{{p.freethrow|caracolor}}">{{p.freethrow}}</td>
+	<td bgcolor="{{p.twopts|caracolor}}">{{p.twopts}}</td>
+	<td bgcolor="{{p.threepts|caracolor}}">{{p.threepts}}</td>
+	<td bgcolor="{{p.dribbling|caracolor}}">{{p.dribbling}}</td>
+	<td bgcolor="{{p.passing|caracolor}}">{{p.passing}}</td>
+	<td bgcolor="{{p.speed|caracolor}}">{{p.speed}}</td>
+	<td bgcolor="{{p.footwork|caracolor}}">{{p.footwork}}</td>
+	<td bgcolor="{{p.rebond|caracolor}}">{{p.rebond}}</td>
+	<td bgcolor="{{p.experience|caracolor}}">{{p.experience}}</td>
+	<td align="center">{{p.last_update|date:"d/m/Y"}}</td>
+</tr>
+{%endfor%}
+</table>
+
+
+</center><br /><br />
+{%endblock%}
