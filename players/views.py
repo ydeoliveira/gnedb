@@ -4,6 +4,7 @@ import re
 import datetime
 
 from django.shortcuts import render
+from django.db.models import Max
 #from django.views.generic.simple import direct_to_template
 
 from players.forms import SubmitForm, PlayerSearch, SearchForm
@@ -21,7 +22,8 @@ def submit(request):
               "search":"",
               "submit":"selected"
               }
-    last_update = Player.objects.all().order_by('-last_update')[0].last_update
+    last_update = Player.objects.all().aggregate(Max('last_update'))['last_update__max']
+    #last_update = Player.objects.all().order_by('-last_update')[0].last_update
     if request.method == "GET":
         count = Player.objects.all().count()
         return render(request,"players/submit.html",{"form":form,

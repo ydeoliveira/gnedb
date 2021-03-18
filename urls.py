@@ -1,25 +1,27 @@
-from django.conf.urls.defaults import *
-from django.contrib.auth.views import login, logout, password_change
+from django.contrib import admin
+from django.urls import path
 from django.conf import settings
+from django.conf.urls import include
+from django.conf.urls.static import static
 
 import os
 
-from players.views import submit, search, single_search, nt_search
+from players.views import submit, search, single_search
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
-    url(r'^$', submit, name='submit'),
-    url(r'^search/$', search, name='search'),
-    url(r'^player/$', single_search, name='single_search'),
-    url(r'^nt/$', nt_search, name='nt_search')
+urlpatterns = [
+    path('', submit, name='submit'),
+    path('search/', search, name='search'),
+    path('player/', single_search, name='single_search'),
+    #path(r'^nt/$', nt_search, name='nt_search')
 
 
-)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-from django.contrib import databrowse
+"""from django.contrib import databrowse
 urlpatterns += patterns('django.views.static',
     (r'^media/(?P<path>.*)$',
         'serve',
@@ -29,4 +31,4 @@ urlpatterns += patterns('django.views.static',
         )
     ),
     (r'^databrowse/(.*)', databrowse.site.root),
-)
+)"""
