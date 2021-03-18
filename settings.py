@@ -13,11 +13,11 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-'ENGINE':'django.db.backends.postgresql_psycopg2',           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-'NAME':'gnedb_base',             # Or path to database file if using sqlite3.
-'USER':'gnedb',             # Not used with sqlite3.
-'PASSWORD':'yayapipi',         # Not used with sqlite3.
-'HOST':'postgresql.alwaysdata.com',             # Set to empty string for localhost. Not used with sqlite3.
+'ENGINE':'django.db.backends.sqlite3',           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+'NAME':'./gnedb.sqlite',             # Or path to database file if using sqlite3.
+'USER':'',             # Not used with sqlite3.
+'PASSWORD':'',         # Not used with sqlite3.
+'HOST':'',             # Set to empty string for localhost. Not used with sqlite3.
 'PORT':''             # Set to empty string for default. Not used with sqlite3.
 }}
 
