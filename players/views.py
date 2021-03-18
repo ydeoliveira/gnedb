@@ -33,58 +33,42 @@ def submit(request):
                                                                  "last_update":last_update})
     else :
         text = request.POST["liste"].split("\n")
+        player_data = None
         for line in text :
-            if line.find(u"Votre recherche a renvoyé") >= 0:
+            if line.find(u"Tout Recommencer") >= 0:
                 parse_player = True
+                player_data = {}
+                continue
             if parse_player :
-                for country in COUNTRIES:
-                    if line.strip().startswith(country):
-                        player_info["country"] = country
-                        player_info["full_name"] = line.split(country)[-1].split("Signet")[0].strip()
-                        player_info["ic"] = line.split("Ind. carac.")[-1].strip()
-                        player_info["age"] = line.split("Age")[-1].split("Salaire")[0].strip()
-                if "full_name" not in player_info.keys() and line.find("Salaire") >= 0:
-                    player_info["country"] = "Unknown"
-                    player_info["full_name"] = line.split("Age")[0].strip()
-                    player_info["ic"] = line.split("Ind. carac.")[-1].strip()
-                    player_info["age"] = line.split("Age")[-1].split("Salaire")[0].strip()
-            if line.startswith(u"Équipe") and parse_player:
-                player_info["height"] = line.split("Taille")[-1].split("Poids")[0].strip()
-                player, created = Player.objects.get_or_create(full_name=player_info["full_name"],
-                                                               #country=player_info["country"],
-                                                               height=player_info["height"],
-                                                               defaults=player_info)
-                player.team = line.split(u"Équipe")[-1].split("Taille")[0].strip()
-                player.imc = line.split(u"IMC:")[-1].split(")")[0].strip()
-                player.ic = player_info["ic"]
-                player.age = player_info["age"]
-                if "country" in player_info.keys() :
-                    player.country = country
-                player.save()
-            if line.strip().startswith(u"Défense") and parse_player:
-                player.defense = line.split(u"Défense")[-1].split(u"Lancers francs")[0].strip()
-                player.freethrow = line.split(u"Lancers francs")[-1].strip()
-                player.save()
-            if line.strip().startswith(u"2 points") and parse_player:
-                player.twopts = line.split(u"2 points")[-1].split(u"3 points")[0].strip()
-                player.threepts =line.split(u"3 points")[-1].split(u"Prix de départ")[0].strip()
-                player.save()
-            if line.strip().startswith(u"Dribble") and parse_player:
-                player.dribbling = line.split(u"Dribble")[-1].split(u"Passe")[0].strip()
-                player.passing = line.split(u"Passe")[-1].split(u"Enchère actuelle")[0].strip()
-                player.save()
-            if line.strip().startswith(u"Vitesse") and parse_player:
-                player.speed = line.split(u"Vitesse")[-1].split(u"Jeu de jambes")[0].strip()
-                player.footwork = line.split(u"Jeu de jambes")[-1].split(u"Dernière enchère")[0].strip()
-                player.save()
-            if line.strip().startswith(u"Rebonds") and parse_player:
-                player.rebond = line.split(u"Rebonds")[-1].split(u"Expérience")[0].strip()
-                player.experience = line.split(u"Expérience")[-1].split(u"Echéance")[0].strip()
-                player.last_update=datetime.datetime.now()
-                player.save()
-                player_info = {}
-                player = None
+                if "full_name" not in player_data.keys() :
+                    player_data["full_name"] = line.strip()
+                    print("player {0}".format(player_data["full_name"]))
+                if line.startswith('ATTAQUE') and parse_player:
+                    expression = "ATTAQUE.*?Nationalité\:\t(?P<country>[\w\,\-\s]+)\sÂge:\t(?P<age>\d{2})\sTaille:\t(?P<height>\d{3})cm\sPoids:\t\d+kg\sSalaire:\t\$\d+\,\d+\sPosition:\t(?P<position>[\w\/]+)\sEnergy"
+                    p = re.compile(expression)
+                    m = p.match(line)
+                    player_data['country'] = m.group('country').strip()
+                    player_data['age'] = m.group('age').strip()
+                    player_data['height'] = m.group('height').strip()
+                    player_data['position'] = m.group('position').strip()
+                    
+                if line.startswith(' Défense:') and parse_player:
+                    expression = " Défense:\t(?P<defense>\d{1,2})\sTir:\t(?P<shot>\d{1,2})\sVitesse:\t(?P<speed>\d{1,2})\sDribble:\t(?P<dribbling>\d{1,2})\sForce:\t(?P<straight>\d{1,2})\sMouvements de Poste:\t(?P<postmove>\d{1,2})\sExpérience:\t(?P<experience>\d{1,2})"
+                    p = re.compile(expression)
+                    m = p.match(line)
+                    player_data['defense'] = m.group('defense').strip()
+                    player_data['shot'] = m.group('shot').strip()
+                    player_data['speed'] = m.group('speed').strip()
+                    player_data['dribbling'] = m.group('dribbling').strip()
+                    player_data['straight'] = m.group('straight').strip()
+                    player_data['postmove'] = m.group('postmove').strip()
+                    player_data['experience'] = m.group('experience').strip()
+                if line.startswith(u"Prix:") and parse_player:
+                    Player.objects.update_or_create(full_name=player_data['full_name'],height=player_data['height'],defaults=player_data)
+                    player_data = {}
+                
         count = Player.objects.all().count()
+        last_update = Player.objects.all().aggregate(Max('last_update'))['last_update__max']
         return render(request,"players/submit.html",{"form":form,
                                                                  "title":"Soumission de joueurs",
                                                                  "count":count,
@@ -92,7 +76,7 @@ def submit(request):
                                                                  "last_update":last_update})
 
 def search(request):
-    last_update = Player.objects.all().order_by('-last_update')[0].last_update
+    last_update = Player.objects.all().aggregate(Max('last_update'))['last_update__max']
     form = SearchForm()
     regexp = "\(Top\s8\s\:\s\d\d\,\d\)"
     parse_player = False
@@ -101,7 +85,7 @@ def search(request):
     player_set = []
     player = {
             "defense":"-",
-            "freethrow":"-",
+            "shoot":"-",
             "twopts":"-",
             "threepts":"-",
             "dribbling":"-",
@@ -125,83 +109,61 @@ def search(request):
     else :
         text = request.POST["liste"].split("\n")
         try:
-            filter = int(request.POST["filter"])
+            filter_age = int(request.POST["filter"])
         except :
-            filter = 100000
+            filter_age = 21
         team_name = ""
+
+        player = {}
         for line in text :
-            if re.match(regexp,line.strip()):
+            if line.strip().startswith("ANALYSE D'EQUIPE"):
                 parse_player = True
-            if line.startswith(u"Saison     Événement") :
+            if line.startswith(u"webelinx") :
                 parse_player = False
-            if parse_player and line.strip() != "" and not line.startswith("Age") and not line.startswith("Taille") and line.find("%") < 0:
-                for tag in NAME_TAG:
-                    line = line.split(tag)[0]
-                player["full_name"] = line.strip()
-            if parse_player and line.startswith("Age"):
-                player["age"] = line.split(u"Age:")[-1].split(u", IC:")[0].strip()
-                player["ic"] = line.split(u"IC:")[-1].strip()
-            if parse_player and line.startswith("Taille"):
-                player["height"] = line.split(u"Taille:")[-1].split(u", IMC:")[0].strip()
-                player["imc"] = line.split(u"IMC:")[-1].strip()
+            if line.startswith(COUNTRIES) and parse_player:
+                print(line)
+                for country in COUNTRIES :
+                    expression = "{0}\s(?P<full_name>.*)".format(country)
+                    p = re.compile(expression)
+                    m = p.match(line)
+                    if m :
+                        player["full_name"] = m.group('full_name').strip()
+                        break
+            if line.startswith('Âge:') and parse_player:
+                expression = "Âge:\s+(?P<age>\d{2})\sTaille:\s(?P<height>\d{3})cm\sPosition:\s(?P<position>[\w\/]+)"
+                p = re.compile(expression)
+                m = p.match(line)
+                player["age"] = m.group('age').strip()
+                player["height"] = m.group('height').strip()
+                player["position"] = m.group('position').strip()
+                if int(player["age"]) < filter_age :
+                    player = {}
+                    continue
+                try :
+                    player_db = Player.objects.get(full_name = player["full_name"], height = int(player["height"]))
+                    player["defense"] = player_db.defense
+                    player["shot"] = player_db.shot
+                    player["speed"] = player_db.speed
+                    player["dribbling"] = player_db.dribbling
+                    player["straight"] = player_db.straight
+                    player["postmove"] = player_db.postmove
+                    player["experience"] = player_db.experience
+                    player["last_update"] = player_db.last_update
+                except Player.DoesNotExist:
+                    player["defense"] = "-"
+                    player["shot"] = "-"
+                    player["speed"] = "-"
+                    player["dribbling"] = "-"
+                    player["straight"] = "-"
+                    player["postmove"] = "-"
+                    player["experience"] = "-"
+                    player["last_update"] = "-"
+ 
+                player_set.append(player)
+                player = {}
 
-                if int("".join(player["ic"].split("."))) > filter:
-                    try :
-                        player_db = Player.objects.get(full_name = player["full_name"], height = int(player["height"]))
-                    except Player.DoesNotExist:
-                        if not player_set :
-                            player_set.append(player)
-                        else :
-                            for p in player_set:
-                                if type(p).__name__ == 'dict' :
-                                    if int(p["height"]) > int(player["height"]):
-                                        player_set.insert(player_set.index(p), player)
-                                        break
-                                    elif player_set.index(p)+1 == len(player_set):
-                                        player_set.insert(player_set.index(p)+1, player)
-                                        break
-                                else:
-                                    if int(p.height) > int(player["height"]):
-                                        player_set.insert(player_set.index(p), player)
-                                        break
-                                    elif player_set.index(p)+1 == len(player_set):
-                                        player_set.insert(player_set.index(p)+1, player)
-                                        break
-                            
-                    else :
-                        if not player_set :
-                            player_set.append(player_db)
-                        else :
-                            for p in player_set:
-                                if type(p).__name__ == 'dict' :
-                                    if int(p["height"]) > int(player_db.height):
-                                        player_set.insert(player_set.index(p), player_db)
-                                        break
-                                    elif player_set.index(p)+1 == len(player_set):
-                                        player_set.insert(player_set.index(p)+1, player_db)
-                                        break
-                                else :
-                                    if int(p.height) > int(player_db.height):
-                                        player_set.insert(player_set.index(p), player_db)
-                                        break
-                                    elif player_set.index(p)+1 == len(player_set):
-                                        player_set.insert(player_set.index(p)+1, player_db)
-                                        break
-                player = {            "defense":"-",
-            "freethrow":"-",
-            "twopts":"-",
-            "threepts":"-",
-            "dribbling":"-",
-            "passing":"-",
-            "speed":"-",
-            "footwork":"-",
-            "rebond":"-",
-            "experience":"-",
-            "last_update":"-"}
-            if line.find(u"a terminé") >= 0:
-                team_name = line.split(u"a terminé")[0].strip()
-
-        return render(request,"players/show.html",{"players":player_set,
+        sorted_players = sorted(player_set, key=lambda k: k['height'])
+        return render(request,"players/show.html",{"players":sorted_players,
                                                                "team":team_name,
                                                                "count":count,
                                                                "select":select,
@@ -209,7 +171,7 @@ def search(request):
                                                                "filter":filter})
 
 def single_search(request):
-    last_update = Player.objects.all().order_by('-last_update')[0].last_update
+    last_update = Player.objects.all().aggregate(Max('last_update'))['last_update__max']
     select = {"team":"",
               "search":"selected",
               "submit":""
@@ -251,22 +213,18 @@ def single_search(request):
                 max = int(request.POST["max_drib"]) if request.POST["max_drib"] else 30
                 min = int(request.POST["min_drib"]) if request.POST["min_drib"] else 1
                 query = query.filter(dribbling__lte=max,dribbling__gte=min)
-            if request.POST["min_pass"] or request.POST["max_pass"] :
-                max = int(request.POST["max_pass"]) if request.POST["max_pass"] else 30
-                min = int(request.POST["min_pass"]) if request.POST["min_pass"] else 1
-                query = query.filter(passing__lte=max,passing__gte=min)
+            if request.POST["min_str"] or request.POST["max_str"] :
+                max = int(request.POST["max_str"]) if request.POST["max_str"] else 30
+                min = int(request.POST["min_str"]) if request.POST["min_str"] else 1
+                query = query.filter(straight__lte=max,straight__gte=min)
             if request.POST["min_shoot"] or request.POST["max_shoot"] :
                 max = int(request.POST["max_shoot"]) if request.POST["max_shoot"] else 30
                 min = int(request.POST["min_shoot"]) if request.POST["min_shoot"] else 1
-                query = query.filter(twopts__lte=max,twopts__gte=min)
+                query = query.filter(shot__lte=max,shot__gte=min)
             if request.POST["min_ftw"] or request.POST["max_ftw"] :
                 max = int(request.POST["max_ftw"]) if request.POST["max_ftw"] else 30
                 min = int(request.POST["min_ftw"]) if request.POST["min_ftw"] else 1
-                query = query.filter(footwork__lte=max,footwork__gte=min)
-            if request.POST["min_reb"] or request.POST["max_reb"] :
-                max = int(request.POST["max_reb"]) if request.POST["max_reb"] else 30
-                min = int(request.POST["min_reb"]) if request.POST["min_reb"] else 1
-                query = query.filter(rebond__lte=max,rebond__gte=min)
+                query = query.filter(postmove__lte=max,postmove__gte=min)
             if request.POST["min_xp"] or request.POST["max_xp"] :
                 max = int(request.POST["max_xp"]) if request.POST["max_xp"] else 30
                 min = int(request.POST["min_xp"]) if request.POST["min_xp"] else 1
@@ -293,7 +251,7 @@ def single_search(request):
                                                                  "select":select,
                                                                  "last_update":last_update})
 
-def nt_search(request):
+"""def nt_search(request):
     form = SearchForm()
     last_update = Player.objects.all().order_by('-last_update')[0].last_update
     count = Player.objects.all().count()
@@ -303,7 +261,7 @@ def nt_search(request):
               "submit":"",
               "nt_search":"selected"
               }
-    tag = u"Détails Joueurs Calendrier"
+    tag = u"ANALYSE D'EQUIPE"
     parse_player = False
     player_set = []
     if request.method == "GET":
@@ -314,11 +272,21 @@ def nt_search(request):
                                                                  "last_update":last_update})
     else :
         text = request.POST["liste"].split("\n")
+        player = {}
         for line in text :
             if line.strip().startswith(tag):
                 parse_player = True
-            if line.startswith(u"Toolbox") :
+            if line.startswith(u"webelinx") :
                 parse_player = False
+            if line.startswith(COUNTRIES) and parse_player:
+                for country in COUNTRIES :
+                    expression = "{0}\s(?P<full_name>.*)".format(country)
+                    p = re.compile(expression)
+                    m = p.match(line)
+                    player["full_name"] = m.group('full_name').strip()
+            if line.startswith('Âge:') and parse_player:
+                expression = "Âge:\s+(?<age>\d{2})\sTaille:\s(?<height{3}>)cm\sPosition:\(?P<position>[\w\/]+)"
+            
             if parse_player is True and not line.startswith("Age") and not line.startswith("Taille") and not line.startswith("Team") and not re.match(regexp,line.strip()) :
                 player = {}
                 player["full_name"] = line.strip()
@@ -384,3 +352,4 @@ def nt_search(request):
                                                                "select":select,
                                                                "last_update":last_update,
                                                                })
+"""

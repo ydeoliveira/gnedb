@@ -12,20 +12,16 @@ Filtre IC utilisé : <b>{{filter}}</b>
 <table>
 <tr>
 	<th width="250px">Nom</th>
-	<th width="100px">IC</th>
+    <th width="50px">Position</th>
 	<th width="50px">Age</th>
 	<th width="50px">Taille</th>
-	<th width="50px">IMC</th>
 	
 	<th width="30px">Def</th>
-	<th width="30px">LF</th>
-	<th width="30px">2pts</th>
-	<th width="30px">3pts</th>
+	<th width="30px">Tir</th>
+    <th width="30px">Vit</th>
 	<th width="30px">Dri</th>
-	<th width="30px">Pas</th>
-	<th width="30px">Vit</th>
-	<th width="30px">JdJ</th>
-	<th width="30px">Reb</th>
+    <th width="30px">For</th>
+	<th width="30px">MdP</th>
 	<th width="30px">Xp</th>
 	<th width="150px">Last update</th>
 
@@ -33,19 +29,16 @@ Filtre IC utilisé : <b>{{filter}}</b>
 {%for p in players%}
 <tr height="20px">
 	<td>{{p.full_name}}</td>
-	<td>{{p.ic}}</td>
+	<td>{{p.position}}</td>
 	<td>{{p.age}}</td>
 	<td>{{p.height}}</td>
-	<td>{{p.imc}}</td>
+
 	<td bgcolor="{{p.defense|caracolor}}">{{p.defense}}</td>
-	<td bgcolor="{{p.freethrow|caracolor}}">{{p.freethrow}}</td>
-	<td bgcolor="{{p.twopts|caracolor}}">{{p.twopts}}</td>
-	<td bgcolor="{{p.threepts|caracolor}}">{{p.threepts}}</td>
+	<td bgcolor="{{p.shot|caracolor}}">{{p.shot}}</td>
+    <td bgcolor="{{p.speed|caracolor}}">{{p.speed}}</td>
 	<td bgcolor="{{p.dribbling|caracolor}}">{{p.dribbling}}</td>
-	<td bgcolor="{{p.passing|caracolor}}">{{p.passing}}</td>
-	<td bgcolor="{{p.speed|caracolor}}">{{p.speed}}</td>
-	<td bgcolor="{{p.footwork|caracolor}}">{{p.footwork}}</td>
-	<td bgcolor="{{p.rebond|caracolor}}">{{p.rebond}}</td>
+    <td bgcolor="{{p.straight|caracolor}}">{{p.straight}}</td>
+	<td bgcolor="{{p.postmove|caracolor}}">{{p.postmove}}</td>
 	<td bgcolor="{{p.experience|caracolor}}">{{p.experience}}</td>
 	<td align="center">{{p.last_update|date:"d/m/Y"}}</td>
 </tr>

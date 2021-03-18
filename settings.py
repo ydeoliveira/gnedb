@@ -110,7 +110,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.request',
 )"""
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_PATH, "static")
 
 
 LOGIN_REDIRECT_URL = '/'

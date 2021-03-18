@@ -9,8 +9,9 @@ class Player(models.Model):
     full_name = models.CharField("Nom ",max_length=150, null=True)
     country = models.CharField("Pays ",max_length=150, null=True)
     height = models.IntegerField("Taille ", null=True)
-    team = models.CharField("Équipe ",max_length=150, null=True)  
+    #team = models.CharField("Équipe ",max_length=150, null=True)  #tocomment
     stars = models.IntegerField("Etoiles ", null=True)
+    position = models.CharField("Positiion",max_length=10, null=True)
     #ic   = models.CharField("Ind. Carac. ",max_length=10, null=True)
     #imc = models.CharField("IMC ",max_length=10, null=True)
     last_update = models.DateTimeField("Last Update ",auto_now_add=True)
@@ -28,4 +29,4 @@ class Player(models.Model):
     #footwork = models.IntegerField("Jeu de Jambe ", null=True)
     #rebond = models.IntegerField("Rebond ", null=True)
     experience = models.IntegerField("Experience ", null=True)
-
+	#ajouter position
